@@ -80,7 +80,7 @@
     var gridAgent = newAgent();      // the grid of weather data
     var rendererAgent = newAgent();  // the globe SVG renderer
     var fieldAgent = newAgent();     // the interpolated wind vector field
-    var animatorAgent = newAgent();  // the wind animator
+    //var animatorAgent = newAgent();  // the wind animator
     var overlayAgent = newAgent();   // color overlay over the animation
 
     /**
@@ -839,7 +839,7 @@
     }
 
     function stopCurrentAnimation(alsoClearCanvas) {
-        animatorAgent.cancel();
+       // animatorAgent.cancel();
         if (alsoClearCanvas) {
             µ.clearCanvas(d3.select("#animation").node());
         }
@@ -983,12 +983,12 @@
         fieldAgent.listenTo(rendererAgent, "start", cancelInterpolation);
         fieldAgent.listenTo(rendererAgent, "redraw", cancelInterpolation);
 
-        animatorAgent.listenTo(fieldAgent, "update", function(field) {
-            animatorAgent.submit(animate, globeAgent.value(), field, gridAgent.value());
-        });
-        animatorAgent.listenTo(rendererAgent, "start", stopCurrentAnimation.bind(null, true));
-        animatorAgent.listenTo(gridAgent, "submit", stopCurrentAnimation.bind(null, false));
-        animatorAgent.listenTo(fieldAgent, "submit", stopCurrentAnimation.bind(null, false));
+//        animatorAgent.listenTo(fieldAgent, "update", function(field) {
+//            animatorAgent.submit(animate, globeAgent.value(), field, gridAgent.value());
+//        });
+//        animatorAgent.listenTo(rendererAgent, "start", stopCurrentAnimation.bind(null, true));
+//        animatorAgent.listenTo(gridAgent, "submit", stopCurrentAnimation.bind(null, false));
+//        animatorAgent.listenTo(fieldAgent, "submit", stopCurrentAnimation.bind(null, false));
 
         overlayAgent.listenTo(fieldAgent, "update", function() {
             overlayAgent.submit(drawOverlay, fieldAgent.value(), configuration.get("overlayType"));
