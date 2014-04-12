@@ -485,14 +485,23 @@
 
         function interpolateColumn(x) {
             var column = [];
+            var clr;
             for (var y = bounds.y; y <= bounds.yMax; y += 2) {
                 if (mask.isVisible(x, y)) {
                     point[0] = x; point[1] = y;
                     var coord = projection.invert(point);
                     var color = TRANSPARENT_BLACK;
+                    clr=color;
                     var wind = null;
                     if (coord) {
                         var λ = coord[0], φ = coord[1];
+                        if(!isNaN(λ) && λ!=null && !isNaN(φ) && φ!=null){
+                            var floorLambda=Math.floor(λ);
+                            var floorFi=Math.floor(φ);
+                            if(window.colordata[floorFi]!=undefined && window.colordata[floorFi][floorLambda]!=undefined){
+                                clr=window.colordata[floorFi][floorLambda];    
+                            }
+                        }
                         if (isFinite(λ)) {
                             wind = interpolate(λ, φ);
                             var scalar = null;
@@ -509,7 +518,8 @@
                         }
                     }
                     column[y+1] = column[y] = wind || HOLE_VECTOR;
-                    mask.set(x, y, color).set(x+1, y, color).set(x, y+1, color).set(x+1, y+1, color);
+                    //color=[255,0,0,255];
+                    mask.set(x, y, clr).set(x+1, y, clr).set(x, y+1, clr).set(x+1, y+1, clr);
                 }
             }
             columns[x+1] = columns[x] = column;
@@ -876,7 +886,21 @@
      */
     function init() {
         report.status("Initializing...");
-
+        
+        var clrdata={};
+        var exampleColors=[[200,0,0,100],[0,200,0,100],[200,200,0,100],[0,0,200,100]];
+        for(var i=-90;i<=90;i++){
+            clrdata[i]={};
+            for(var j=-180;j<=180;j++){
+                var rnd=Math.floor((Math.random()*4));
+                clrdata[i][j]=exampleColors[rnd];
+            }
+        }
+        clrdata[0]=[255,0,0,255];
+        clrdata[1]=[0,255,0,255];
+        
+        window.colordata=clrdata;
+        
         d3.select("#sponsor-link")
             .attr("target", µ.isEmbeddedInIFrame() ? "_new" : null)
             .on("click", reportSponsorClick.bind(null, "click"))
@@ -982,13 +1006,6 @@
         fieldAgent.listenTo(rendererAgent, "render", startInterpolation);
         fieldAgent.listenTo(rendererAgent, "start", cancelInterpolation);
         fieldAgent.listenTo(rendererAgent, "redraw", cancelInterpolation);
-
-//        animatorAgent.listenTo(fieldAgent, "update", function(field) {
-//            animatorAgent.submit(animate, globeAgent.value(), field, gridAgent.value());
-//        });
-//        animatorAgent.listenTo(rendererAgent, "start", stopCurrentAnimation.bind(null, true));
-//        animatorAgent.listenTo(gridAgent, "submit", stopCurrentAnimation.bind(null, false));
-//        animatorAgent.listenTo(fieldAgent, "submit", stopCurrentAnimation.bind(null, false));
 
         overlayAgent.listenTo(fieldAgent, "update", function() {
             overlayAgent.submit(drawOverlay, fieldAgent.value(), configuration.get("overlayType"));
