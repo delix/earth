@@ -6,6 +6,7 @@
  *
  * https://github.com/cambecc/earth
  */
+
 (function() {
     "use strict";
 
@@ -496,8 +497,9 @@
                     if (coord) {
                         var λ = coord[0], φ = coord[1];
                         if(!isNaN(λ) && λ!=null && !isNaN(φ) && φ!=null){
-                            var floorLambda=Math.floor(λ);
-                            var floorFi=Math.floor(φ);
+                            var floorLambda="" + Math.floor(λ);
+                            var floorFi = φ;
+                            floorFi=(Math.round(floorFi*2)/2).toFixed(1);
                             if(window.colordata[floorFi]!=undefined && window.colordata[floorFi][floorLambda]!=undefined){
                                 clr=window.colordata[floorFi][floorLambda];    
                             }
@@ -771,13 +773,32 @@
     /**
      * Display the specified wind value. Allow toggling between the different types of wind units.
      */
-    function showWindAtLocation(wind, product) {
+    function showWindAtLocation(wind, product,lambda,fi) {
         var unitToggle = createUnitToggle("#location-wind-units", product), units = unitToggle.value();
-        d3.select("#location-wind").text(µ.formatVector(wind, units));
-        d3.select("#location-wind-units").text(units.label).on("click", function() {
-            unitToggle.next();
-            showWindAtLocation(wind, product);
-        });
+        var clr=null;
+        if(!isNaN(lambda) && lambda!=null && !isNaN(fi) && fi!=null){
+            var floorLambda="" + Math.floor(lambda);
+            var floorFi = fi;
+            floorFi=(Math.round(floorFi*2)/2).toFixed(1);
+            if(window.colordata[floorFi]!=undefined && window.colordata[floorFi][floorLambda]!=undefined){
+                clr=window.colordata[floorFi][floorLambda];    
+            }
+        }
+        var jacina=undefined;
+        if(clr!=null && clr!=undefined){
+            jacina=colorToValue(clr);
+        }
+        var textt="Gravitational Acceleration: N\A";
+        if(jacina!=undefined){
+            textt="Gravitational Acceleration: "+jacina+" m/s^2";
+        }
+        d3.select("#location-wind").text(textt);
+        //tuka
+        
+//        d3.select("#location-wind-units").text(units.label).on("click", function() {
+//            unitToggle.next();
+//            showWindAtLocation(wind, product);
+//        });
     }
 
     /**
@@ -820,7 +841,7 @@
         if (field.isDefined(point[0], point[1]) && grids) {
             var wind = grids.primaryGrid.interpolate(λ, φ);
             if (µ.isValue(wind)) {
-                showWindAtLocation(wind, grids.primaryGrid);
+                showWindAtLocation(wind, grids.primaryGrid,λ,φ);
             }
             if (grids.overlayGrid !== grids.primaryGrid) {
                 var value = grids.overlayGrid.interpolate(λ, φ);
@@ -887,20 +908,7 @@
     function init() {
         report.status("Initializing...");
         
-        var clrdata={};
-        var exampleColors=[[200,0,0,100],[0,200,0,100],[200,200,0,100],[0,0,200,100]];
-        for(var i=-90;i<=90;i++){
-            clrdata[i]={};
-            for(var j=-180;j<=180;j++){
-                var rnd=Math.floor((Math.random()*4));
-                clrdata[i][j]=exampleColors[rnd];
-            }
-        }
-        clrdata[0]=[255,0,0,255];
-        clrdata[1]=[0,255,0,255];
-        
-        window.colordata=clrdata;
-        
+  
         d3.select("#sponsor-link")
             .attr("target", µ.isEmbeddedInIFrame() ? "_new" : null)
             .on("click", reportSponsorClick.bind(null, "click"))
@@ -1135,7 +1143,74 @@
         // Everything is now set up, so load configuration from the hash fragment and kick off change events.
         configuration.fetch();
     }
-
+    function colorToValue(color){
+        var dict={
+             "127,0,0,255":9.7821,
+    "143,0,0,255":9.782,
+    "159,0,0,255":9.7818,
+    "175,0,0,255":9.7816,
+    "193,0,0,255":9.7815,
+    "207,0,0,255":9.7813,
+    "223,0,0,255":9.7811,
+    "239,0,0,255":9.781,
+    "255,0,0,255":9.7808,
+    "255,15,0,255":9.7806,
+    "255,31,0,255":9.7805,
+    "255,47,0,255":9.7803,
+    "255,63,0,255":9.7801,
+    "255,79,0,255":9.78,
+    "255,95,0,255":9.7798,
+    "255,111,0,255":9.7796,
+    "255,127,0,255":9.7795,
+    "255,143,0,255":9.7793,
+    "255,159,0,255":9.7791,
+    "255,175,0,255":9.779,
+    "255,191,0,255":9.7788,
+    "255,207,0,255":9.7786,
+    "255,223,0,255":9.7785,
+    "255,239,0,255":9.7783,
+    "255,255,0,255":9.7781,
+    "239,255,15,255":9.778,
+    "223,255,31,255":9.7778,
+    "207,255,47,255":9.7776,
+    "191,255,63,255":9.7775,
+    "175,255,79,255":9.7773,
+    "159,255,95,255":9.7771,
+    "143,255,111,255":9.777,
+    "127,255,127,255":9.7768,
+    "111,255,143,255":9.7766,
+    "95,255,159,255":9.7765,
+    "79,255,175,255":9.7763,
+    "63,255,191,255":9.7761,
+    "47,255,207,255":9.776,
+    "31,255,223,255":9.7758,
+    "15,255,239,255":9.7756,
+    "0,255,255,255":9.7755,
+    "0,239,255,255":9.7753,
+    "0,223,255,255":9.7751,
+    "0,207,255,255":9.775,
+    "0,191,255,255":9.7748,
+    "0,175,255,255":9.7746,
+    "0,159,255,255":9.7745,
+    "0,143,255,255":9.7743,
+    "0,127,255,255":9.7741,
+    "0,111,255,255":9.774,
+    "0,95,255,255":9.7738,
+    "0,79,255,255":9.7736,
+    "0,63,255,255":9.7735,
+    "0,47,255,255":9.7733,
+    "0,31,255,255":9.7731,
+    "0,15,255,255":9.773,
+    "0,0,255,255":9.7728,
+    "0,0,239,255":9.7726,
+    "0,0,223,255":9.7725,
+    "0,0,207,255":9.7723,
+    "0,0,191,255":9.7721,
+    "0,0,175,255":9.772,
+    "0,0,159,255":9.7718,
+    "255,255,255,255":0};
+      return dict[""+color];
+    }
     when(true).then(init).then(start).otherwise(report.error);
 
 })();
